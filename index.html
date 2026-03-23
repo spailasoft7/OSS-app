@@ -142,6 +142,67 @@ loadAnnouncements();
       });
     }
   </script>
+
+  <script>
+(async function () {
+  const appName = " PWA OSS news"; // <-- change for each app
+  const today = new Date().toISOString().slice(0,10); // "2026-02-13"
+  const localKey = `tracked_${appName}_${today}`;   // unique key per app per day
+
+  // Check if already tracked today for this app
+  if (localStorage.getItem(localKey)) {
+    console.log(`User already tracked today for ${appName}, skipping...`);
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const user_agent = navigator.userAgent;
+
+  // --- Get country (once per session) ---
+  let country = localStorage.getItem("country");
+  if (!country) {
+    try {
+      const res = await fetch("https://ipwho.is/"); // reliable for APK/WebView
+      const data = await res.json();
+      country = data.country || "Unknown";
+    } catch (err) {
+      console.log("IP detection failed:", err);
+      country = "Unknown";
+    }
+    localStorage.setItem("country", country);
+  }
+
+  // --- Send to Supabase ---
+  try {
+    const res = await fetch("https://xcqyvwavabuasunhauhh.supabase.co/rest/v1/app_users", {
+      method: "POST",
+      headers: {
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjcXl2d2F2YWJ1YXN1bmhhdWhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NTE1ODksImV4cCI6MjA4NjIyNzU4OX0.zcWVHgn2DriZ9c7aCEBUJOWoe5IGDFzKYntluQdl3Us",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjcXl2d2F2YWJ1YXN1bmhhdWhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2NTE1ODksImV4cCI6MjA4NjIyNzU4OX0.zcWVHgn2DriZ9c7aCEBUJOWoe5IGDFzKYntluQdl3Us",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify({
+        first_seen: now,
+        last_seen: now,
+        country: country,
+        user_agent: user_agent,
+        app_name: appName
+      })
+    });
+
+    const data = await res.json();
+    console.log("Supabase response:", data);
+
+    // Mark this app as tracked today
+    localStorage.setItem(localKey, "true");
+
+  } catch (err) {
+    console.error("User tracking error:", err);
+  }
+})();</script>
+
+  
   <script src="app.js"></script>
 </body>
 </html>
