@@ -25,6 +25,15 @@ body{margin:0;font-family:'Poppins',sans-serif;background:linear-gradient(180deg
   <button onclick="window.location.href='more.html'">💡<span>More</span></button>
   <button class="active">⚡<span>Status</span></button>
 </div>
+ <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('Service Worker registered', reg))
+          .catch(err => console.log('Service Worker failed', err));
+      });
+    }
+  </script>
 
 <script>
 const statusDiv=document.getElementById('status');
