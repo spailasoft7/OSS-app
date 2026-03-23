@@ -202,7 +202,29 @@ loadAnnouncements();
   }
 })();</script>
 
-  
+  <script type="module">
+import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+const messaging = getMessaging();
+
+// Request permission
+Notification.requestPermission().then(async (permission) => {
+  if (permission === "granted") {
+    const token = await getToken(messaging, {
+      vapidKey: "AIzaSyAa5E1EbFA7ljnoX5WmKpLcUXeNhFzYD54"
+    });
+    console.log("User token:", token);
+
+    // Save this token to your database (important!)
+  }
+});
+
+// When app is open
+onMessage(messaging, (payload) => {
+  console.log("Message received:", payload);
+  alert(payload.notification.title + "\n" + payload.notification.body);
+});
+  </script>
   <script src="app.js"></script>
 </body>
 </html>
